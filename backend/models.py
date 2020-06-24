@@ -4,7 +4,7 @@ from app import database, ma
 class Call(database.Model):
     __tablename__ = 'call'
     call_id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    investment_name = database.Column(database.String(120), unique=True, nullable=False)
+    investment_name = database.Column(database.String(120), nullable=False)
     date = database.Column(database.String(120), nullable=False)
     capital_requirement = database.Column(database.Integer, nullable=False)
 
@@ -39,7 +39,7 @@ class Commitment(database.Model):
 class FundInvestment(database.Model):
     __tablename__ = 'fund_investment'
     id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    fund_id = database.Column(database.ForeignKey('fund.fund_id'), nullable=False, )
+    fund_id = database.Column(database.ForeignKey('fund.fund_id'), nullable=False)
     commitment_id = database.Column(database.ForeignKey('commitment.commitment_id'), nullable=False)
     call_id = database.Column(database.ForeignKey('call.call_id'), nullable=False)
     investment_amount = database.Column(database.Integer, nullable=False)
@@ -49,6 +49,20 @@ class FundInvestment(database.Model):
         self.commitment_id = commitment_id
         self.call_id = call_id
         self.investment_amount = investment_amount
+
+
+class Drawdown:
+
+    def __init__(self, commitment_id, before_drawdown, new_undrawn, drawdown_notice):
+        self.commitment_id = commitment_id
+        self.before_drawdown = before_drawdown
+        self.new_undrawn = new_undrawn
+        self.drawdown_notice = drawdown_notice
+
+
+class DrawdownSchema(ma.Schema):
+    class Meta:
+        fields = ('commitment_id', 'before_drawdown', 'new_undrawn', 'drawdown_notice')
 
 
 class FundSchema(ma.Schema):
@@ -69,6 +83,3 @@ class FundInvestmentSchema(ma.Schema):
 class CallSchema(ma.Schema):
     class Meta:
         fields = ('call_id', 'investment_name', 'date', 'capital_requirement')
-
-
-database.create_all()

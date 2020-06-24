@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import 'material-components-web/dist/material-components-web.min.css'
 import NewCallTable from "./components/NewCallTable";
-import Form from "./components/CallForm";
+import CallForm from "./components/CallForm";
 
 class NewCall extends Component {
 
@@ -14,7 +14,7 @@ class NewCall extends Component {
                         <h1>New Call</h1>
                     </div>
                     <NewCallTable/>
-                    <Form/>
+                    <CallForm/>
                 </div>
             </div>
         );

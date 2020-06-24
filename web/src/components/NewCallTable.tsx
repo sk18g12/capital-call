@@ -120,8 +120,8 @@ class NewCallTable extends Component {
                                             maximumFractionDigits: 0
                                         }).format(this.calculateUndrawnCapital(fundInvestments, row.fund_id, row.commitment_id, row.amount))}
                                     </td>
-                                    <td className="mdc-data-table__cell">4.0</td>
-                                    <td className="mdc-data-table__cell">Super tasty</td>
+                                    <td className="mdc-data-table__cell">0</td>
+                                    <td className="mdc-data-table__cell">0</td>
                                 </tr>
                             ))}
                             </tbody>

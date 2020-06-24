@@ -13,6 +13,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-router": "^5.1.7",
     "@types/react-router-dom": "^5.1.5",
+    "@types/yup": "^0.29.3",
     "formik": "^2.1.4",
     "material-components-web": "^6.0.0",
     "react": "^16.13.1",
@@ -20,7 +21,8 @@
     "react-router": "latest",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "yup": "^0.29.1"
   },
   "scripts": {
     "start": "react-scripts start",
