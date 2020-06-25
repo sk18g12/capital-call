@@ -1,10 +1,12 @@
 import os
 import sqlite3
 
-if os.path.exists('database.sqlite'):
-    os.remove('database.sqlite')
+database_file_name = 'database.sqlite'
 
-conn = sqlite3.connect('database.sqlite')
+if os.path.exists(database_file_name):
+    os.remove(database_file_name)
+
+conn = sqlite3.connect(database_file_name)
 print("Opened database successfully")
 
 with open('database.sql', 'r') as sql_file:

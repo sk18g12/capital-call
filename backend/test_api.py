@@ -31,11 +31,18 @@ class TestApi(unittest.TestCase):
         statuscode = response.status_code
         self.assertEquals(statuscode, 200)
 
-    def test_get_commitments(self):
+    def test_incorrect_url(self):
         tester = app.test_client(self)
-        response = tester.get('/api/commitments')
+        response = tester.get('/api/abcd')
         statuscode = response.status_code
-        self.assertEquals(statuscode, 200)
+        self.assertEquals(statuscode, 404)
+
+    def test_calculate_incorrect_http_method(self):
+        tester = app.test_client(self)
+        response = tester.get('/api/calculate')
+        statuscode = response.status_code
+        # 405 - Method Not Allowed
+        self.assertEquals(statuscode, 405)
 
 
 if __name__ == "__main__":

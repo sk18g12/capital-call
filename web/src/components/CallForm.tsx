@@ -50,7 +50,7 @@ class CallForm extends Component {
 
     render() {
         // @ts-ignore
-        var {calculateResult} = this.state;
+        let {calculateResult} = this.state;
 
         return (
 

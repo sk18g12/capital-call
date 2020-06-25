@@ -1,13 +1,16 @@
 import React, {Component} from "react";
 
 class NewCallTable extends Component {
+
     constructor(props: any) {
         super(props);
         this.state = {
-            items: [],
+            commitments: [],
             fundInvestments: [],
             funds: [],
-            isLoaded: false
+            commitmentsIsLoaded: false,
+            fundInvestmentsIsLoaded: false,
+            fundsIsLoaded: false
         }
     }
 
@@ -16,15 +19,15 @@ class NewCallTable extends Component {
             .then(res => res.json())
             .then(json => {
                 this.setState({
-                    isLoaded: true,
-                    items: json,
+                    commitmentsIsLoaded: true,
+                    commitments: json,
                 })
             });
         fetch('http://localhost:5000/api/funds')
             .then(res => res.json())
             .then(json => {
                 this.setState({
-                    isLoaded: true,
+                    fundsIsLoaded: true,
                     funds: json,
                 })
             });
@@ -32,7 +35,7 @@ class NewCallTable extends Component {
             .then(res => res.json())
             .then(json => {
                 this.setState({
-                    isLoaded: true,
+                    fundInvestmentsIsLoaded: true,
                     fundInvestments: json,
                 })
             });
@@ -66,9 +69,9 @@ class NewCallTable extends Component {
 
     render() {
         // @ts-ignore
-        var {isLoaded, items, fundInvestments, funds} = this.state;
+        var {commitmentsIsLoaded, fundInvestmentsIsLoaded, fundsIsLoaded, commitments, fundInvestments, funds} = this.state;
 
-        if (!isLoaded) {
+        if (!commitmentsIsLoaded || !fundInvestmentsIsLoaded || !fundsIsLoaded) {
             return <div>Loading</div>
         } else {
 
@@ -98,7 +101,7 @@ class NewCallTable extends Component {
                             </tr>
                             </thead>
                             <tbody className="mdc-data-table__content">
-                            {items.map((row: any) => (
+                            {commitments.map((row: any) => (
                                 <tr key={row.commitment_id} className="mdc-data-table__row">
                                     <td className="mdc-data-table__cell">{row.commitment_id}</td>
                                     <td className="mdc-data-table__cell">{row.fund_id}</td>

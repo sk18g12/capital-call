@@ -86,10 +86,9 @@ def calculate():
     date = request.json['date']
     commit = request.json['commit']
     capital_requirement = amount
+    drawdowns = []
 
     global new_undrawn, call, drawdown_notice, undrawn_amount
-
-    drawdowns = []
 
     all_commitments = Commitment.query.all()
 
