@@ -5,14 +5,35 @@ from app import app, database
 
 class TestApi(unittest.TestCase):
     def setUp(self):
-        app.config.from_object('webapp.config.Testing')
         database.session.close()
         database.drop_all()
         database.create_all()
 
-    def test_get(self):
+    def tearDown(self):
+        database.session.close()
+        database.drop_all()
+
+    def test_get_funds(self):
         tester = app.test_client(self)
-        response = tester.get('/funds')
+        response = tester.get('/api/funds')
+        statuscode = response.status_code
+        self.assertEquals(statuscode, 200)
+
+    def test_get_calls(self):
+        tester = app.test_client(self)
+        response = tester.get('/api/calls')
+        statuscode = response.status_code
+        self.assertEquals(statuscode, 200)
+
+    def test_get_fund_investments(self):
+        tester = app.test_client(self)
+        response = tester.get('/api/fund_investments')
+        statuscode = response.status_code
+        self.assertEquals(statuscode, 200)
+
+    def test_get_commitments(self):
+        tester = app.test_client(self)
+        response = tester.get('/api/commitments')
         statuscode = response.status_code
         self.assertEquals(statuscode, 200)
 

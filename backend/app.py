@@ -1,28 +1,35 @@
 import os
 
-from flask import Flask, jsonify, request, Response
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-CORS(app)
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.sqlite')
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+def create_app():
+    app = Flask(__name__)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.sqlite')
+    app.config['SQLALCHEMY_ECHO'] = True
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    CORS(app)
 
+    return app
+
+
+# App and database setup
+app = create_app()
 database = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 from models import *
 
+# SQLAlchemy setup
 database.create_all()
 database.session.commit()
 
 
-@app.route("/funds", methods=["GET"])
+@app.route("/api/funds", methods=["GET"])
 def get_funds():
     funds_schema = FundSchema(many=True)
     all_funds = Fund.query.all()
@@ -30,7 +37,7 @@ def get_funds():
     return jsonify(result)
 
 
-@app.route("/calls", methods=["GET"])
+@app.route("/api/calls", methods=["GET"])
 def get_calls():
     calls_schema = CallSchema(many=True)
     all_calls = Call.query.all()
@@ -38,7 +45,7 @@ def get_calls():
     return jsonify(result)
 
 
-@app.route("/commitments", methods=["GET"])
+@app.route("/api/commitments", methods=["GET"])
 def get_commitments():
     commitments_schema = CommitmentSchema(many=True)
     all_commitments = Commitment.query.all()
@@ -46,7 +53,7 @@ def get_commitments():
     return jsonify(result)
 
 
-@app.route("/fund_investments", methods=["GET"])
+@app.route("/api/fund_investments", methods=["GET"])
 def get_fund_investments():
     fund_investments_schema = FundInvestmentSchema(many=True)
     all_fund_investments = FundInvestment.query.all()
@@ -54,68 +61,67 @@ def get_fund_investments():
     return jsonify(result)
 
 
-@app.route("/call", methods=["POST"])
-def add_call():
-    investment_name = request.json['investment_name']
-    date = request.json['date']
-    capital_requirement = request.json['capital_requirement']
-
-    new_call = Call(investment_name, date, capital_requirement)
+def add_call(investment_name, date, capital_requirement):
+    new_call = Call(investment_name=investment_name, date=date, capital_requirement=capital_requirement)
 
     # Add the new call to the database
     database.session.add(new_call)
     database.session.commit()
-
-    # Return 201(Created) HTTP response after call addition
-    return Response(new_call, status=201, mimetype='application/json')
+    return new_call
 
 
-@app.route("/fund_investment", methods=["POST"])
-def add_fund_investment():
-    call_id = request.json['call_id']
-    fund_id = request.json['fund_id']
-    commitment_id = request.json['commitment_id']
-    investment_amount = request.json['investment_amount']
+def add_fund_investments(amount, commitment, call):
+    new_fund_investment = FundInvestment(commitment.fund_id, commitment.commitment_id, call.call_id, amount)
 
-    new_fund_investment = FundInvestment(fund_id, commitment_id, call_id, investment_amount)
-
-    # Add the new call to the database
+    # Add the new fund investment to the database
     database.session.add(new_fund_investment)
     database.session.commit()
-
-    # Return 201(Created) HTTP response after call addition
-    return Response(new_fund_investment, status=201, mimetype='application/json')
+    return new_fund_investment
 
 
-@app.route("/calculate", methods=["POST"])
+@app.route("/api/calculate", methods=["POST"])
 def calculate():
     amount = request.json['amount']
+    investment_name = request.json['investment_name']
+    date = request.json['date']
+    commit = request.json['commit']
+    capital_requirement = amount
+
+    global new_undrawn, call, drawdown_notice, undrawn_amount
+
     drawdowns = []
 
     all_commitments = Commitment.query.all()
+
+    if commit:
+        call = add_call(investment_name, date, capital_requirement)
 
     for commitment in all_commitments:
         all_fund_investments = FundInvestment.query.filter_by(
             commitment_id=commitment.commitment_id, fund_id=commitment.fund_id).all()
 
-        global new_undrawn
-        global drawdown_notice
-
+        # By default, undrawn amount is set the same as the commitment amount
         undrawn_amount = commitment.amount
 
+        ''' If there are fund investment entries already in the db for this commitment, for each entry 
+            we then subtract each investment_amount from the undrawn amount
+        '''
         if all_fund_investments:
-            undrawn_amount = commitment.amount - all_fund_investments[0].investment_amount
+            for fund_investment in all_fund_investments:
+                undrawn_amount = undrawn_amount - fund_investment.investment_amount
 
         if amount > 0:
             if amount < undrawn_amount:
                 new_undrawn = undrawn_amount - amount
                 drawdown_notice = amount
-                # add fund_investment of value of amount
+                if commit:
+                    add_fund_investments(amount, commitment, call)
                 amount = 0
             else:
                 amount = amount - undrawn_amount
                 drawdown_notice = undrawn_amount
-                # add fund_investment of value of undrawn
+                if commit:
+                    add_fund_investments(undrawn_amount, commitment, call)
                 new_undrawn = 0
 
             drawdown = Drawdown(commitment.commitment_id, undrawn_amount, new_undrawn, drawdown_notice)
@@ -129,9 +135,11 @@ def calculate():
     dropdown_schema = DrawdownSchema(many=True)
     result = dropdown_schema.dump(drawdowns)
 
-    # Return 201(Created) HTTP response after call addition
-    return jsonify(result)
+    if amount <= 0:
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 400
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0')
