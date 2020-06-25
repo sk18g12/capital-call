@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
 import 'material-components-web/dist/material-components-web.min.css'
-import NewCallTable from "./components/NewCallTable";
-import CallForm from "./components/CallForm";
+import NewCallTable from "../components/NewCallTable";
+import CallForm from "../components/CallForm";
 
 class NewCall extends Component {
 

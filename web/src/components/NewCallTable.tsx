@@ -12,7 +12,7 @@ class NewCallTable extends Component {
     }
 
     componentDidMount(): void {
-        fetch('http://localhost:5000/commitments')
+        fetch('http://localhost:5000/api/commitments')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -20,7 +20,7 @@ class NewCallTable extends Component {
                     items: json,
                 })
             });
-        fetch('http://localhost:5000/funds')
+        fetch('http://localhost:5000/api/funds')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -28,7 +28,7 @@ class NewCallTable extends Component {
                     funds: json,
                 })
             });
-        fetch('http://localhost:5000/fund_investments')
+        fetch('http://localhost:5000/api/fund_investments')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -45,7 +45,11 @@ class NewCallTable extends Component {
         if (!filtered.length) {
             return commitment_amount
         } else {
-            return commitment_amount - filtered[0].investment_amount
+            let undrawn_capital: number = commitment_amount;
+            filtered.forEach(function (item: any, index: number) {
+                undrawn_capital = undrawn_capital - item.investment_amount
+            });
+            return undrawn_capital
         }
     }
 
@@ -91,12 +95,6 @@ class NewCallTable extends Component {
                                 <th className="mdc-data-table__header-cell" role="columnheader" scope="col">Undrawn
                                     Capital BEFORE
                                 </th>
-                                <th className="mdc-data-table__header-cell" role="columnheader" scope="col">Total
-                                    Drawdown Notice
-                                </th>
-                                <th className="mdc-data-table__header-cell" role="columnheader" scope="col">Undrawn
-                                    Capital AFTER
-                                </th>
                             </tr>
                             </thead>
                             <tbody className="mdc-data-table__content">
@@ -120,8 +118,6 @@ class NewCallTable extends Component {
                                             maximumFractionDigits: 0
                                         }).format(this.calculateUndrawnCapital(fundInvestments, row.fund_id, row.commitment_id, row.amount))}
                                     </td>
-                                    <td className="mdc-data-table__cell">0</td>
-                                    <td className="mdc-data-table__cell">0</td>
                                 </tr>
                             ))}
                             </tbody>

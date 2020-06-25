@@ -29,7 +29,7 @@ body {
 }
 
 .form-controls {
-    margin: 60px;
+    margin: 30px;
 }
 
 .form-buttons {
@@ -39,4 +39,12 @@ body {
 
 .form-errors {
     color: black;
+}
+
+.mdc-data-table__content {
+    text-align: left;
+}
+
+.mdc-data-table__header-cell {
+    font-weight: bold;
 }

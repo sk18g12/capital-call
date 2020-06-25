@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
 import 'material-components-web/dist/material-components-web.min.css'
-import FundInvestmentTable from "./components/FundInvestmentTable";
+import FundInvestmentTable from "../components/FundInvestmentTable";
 
 class Dashboard extends Component {
     render() {

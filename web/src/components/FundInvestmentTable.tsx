@@ -14,7 +14,7 @@ class FundInvestmentTable extends Component {
     }
 
     componentDidMount(): void {
-        fetch('http://localhost:5000/calls')
+        fetch('http://localhost:5000/api/calls')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -22,7 +22,7 @@ class FundInvestmentTable extends Component {
                     callsIsLoaded: true
                 })
             });
-        fetch('http://localhost:5000/funds')
+        fetch('http://localhost:5000/api/funds')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -30,7 +30,7 @@ class FundInvestmentTable extends Component {
                     fundsIsLoaded: true
                 })
             });
-        fetch('http://localhost:5000/fund_investments')
+        fetch('http://localhost:5000/api/fund_investments')
             .then(res => res.json())
             .then(json => {
                 this.setState({
@@ -65,9 +65,9 @@ class FundInvestmentTable extends Component {
                     <table className="mdc-data-table__table" aria-label="Dessert calories">
                         <thead>
                         <tr className="mdc-data-table__header-row">
-                            <th className="mdc-data-table__header-cell" role="columnheader" scope="col">Date</th>
+                            <th className="mdc-data-table__header-cell" role="columnheader" scope="col">Call ID</th>
                             <th className="mdc-data-table__header-cell mdc-data-table__header-cell--numeric"
-                                role="columnheader" scope="col">Call ID
+                                role="columnheader" scope="col">Date
                             </th>
                             {funds.map((row: any) => {
                                 return (
@@ -85,7 +85,7 @@ class FundInvestmentTable extends Component {
                                     <td className="mdc-data-table__cell">{new Intl.DateTimeFormat("en-GB").format(Date.parse(call.date))}</td>
                                     {funds.map((fund: any) => {
                                         return (
-                                            <td className="mdc-data-table__cell">
+                                            <td className="mdc-data-table__cell" key={fund.fund_id}>
                                                 {new Intl.NumberFormat("en-GB", {
                                                     style: "currency",
                                                     currency: "USD",

@@ -16,23 +16,35 @@ class CallForm extends Component {
         }
     }
 
-    calculate(values: any) {
+    calculate(values: any, commit: boolean) {
         if (values.amount) {
-            fetch('http://localhost:5000/calculate', {
+            fetch('http://localhost:5000/api/calculate', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: values.amount
+                    amount: values.amount,
+                    investment_name: values.investment_name,
+                    date: values.date,
+                    commit: commit
                 })
-            }).then(res => res.json())
-                .then(json => {
+            }).then(res => {
+                if (res.status === 400) {
+                    alert(`Looks like there isn't enough capital to add this call`);
                     this.setState({
-                        calculateResult: json
+                        calculateResult: []
                     })
-                });
+                }
+                return res.json()
+            }).then(json => {
+                this.setState({
+                    calculateResult: json
+                })
+            }).catch(function (error) {
+                alert("Error: There has been an issue with adding your call. " + error);
+            });
         }
     }
 
@@ -68,9 +80,24 @@ class CallForm extends Component {
                             {calculateResult.map((row: any) => (
                                 <tr key={row.commitment_id} className="mdc-data-table__row">
                                     <td className="mdc-data-table__cell">{row.commitment_id}</td>
-                                    <td className="mdc-data-table__cell">{row.before_drawdown}</td>
-                                    <td className="mdc-data-table__cell">{row.drawdown_notice}</td>
-                                    <td className="mdc-data-table__cell">{row.new_undrawn}</td>
+                                    <td className="mdc-data-table__cell">{new Intl.NumberFormat("en-GB", {
+                                        style: "currency",
+                                        currency: "USD",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }).format(row.before_drawdown)}</td>
+                                    <td className="mdc-data-table__cell">{new Intl.NumberFormat("en-GB", {
+                                        style: "currency",
+                                        currency: "USD",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }).format(row.drawdown_notice)}</td>
+                                    <td className="mdc-data-table__cell">{new Intl.NumberFormat("en-GB", {
+                                        style: "currency",
+                                        currency: "USD",
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    }).format(row.new_undrawn)}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -96,19 +123,31 @@ class CallForm extends Component {
                                 .required('Amount is Required'),
                         })}
                         onSubmit={(values, {setSubmitting}) => {
-                            fetch('http://localhost:5000/call', {
+                            fetch('http://localhost:5000/api/calculate', {
                                 method: 'POST',
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
+                                    amount: values.amount,
                                     investment_name: values.investment_name,
                                     date: values.date,
-                                    capital_requirement: values.amount
+                                    commit: true
                                 })
+                            }).then(res => {
+                                if (res.status === 400) {
+                                    alert(`Looks like there isn't enough capital to add this call`);
+                                    this.setState({
+                                        calculateResult: []
+                                    })
+                                }
+                                if (res.status === 200) {
+                                    alert("New call has been added to the database");
+                                }
+                            }).catch((e) => {
+                                alert("Error: There has been an issue with adding your call " + e);
                             });
-                            alert("New call has been added to the database");
 
                         }}>
 
@@ -170,7 +209,7 @@ class CallForm extends Component {
                                     <div className="mdc-layout-grid__cell--span-12">
                                         <div className="form-buttons">
                                             <Button variant="contained" color="primary"
-                                                    onClick={() => this.calculate(formik.values)}>Calculate</Button>
+                                                    onClick={() => this.calculate(formik.values, false)}>Calculate</Button>
                                             <Button type="submit" variant="contained" color="primary">
                                                 Add Call
                                             </Button>
@@ -187,6 +226,6 @@ class CallForm extends Component {
             </div>
         )
     }
-};
+}
 
 export default CallForm;
