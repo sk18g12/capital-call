@@ -17,4 +17,6 @@ The fund managers need a system to determine which investor(s) they need to call
 * Run `docker-compose -f docker-compose.yml up -d --build` in the project root folder
 * Access the frontend UI at http://localhost:3000
 
+Alternatively you can run each Docker container individually, see README's in the backend and web directories.
+
 ![Docker Dashboard after Docker Compose Run](docker_dashboard.png)
